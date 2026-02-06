@@ -89,11 +89,18 @@
                 </div>
                 <div class="weight-divider"></div>
                 <div class="weight-info">
-                    <span class="label">Meta da Semana</span>
+                    <span class="label">Meta <span id="weekIdDisplay"
+                            style="opacity: 0.6; font-size: 0.8em;">--</span></span>
                     <div class="weight-input-group goal-group">
                         <input type="number" id="targetWeightInput" step="0.1" placeholder="--"
                             onchange="saveTargetWeight()">
                         <span class="unit">kg</span>
+                        <div id="goalSaveFeedback" class="save-feedback-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80"
+                                stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
                     </div>
                 </div>
                 <div class="weight-icon">

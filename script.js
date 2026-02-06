@@ -113,8 +113,15 @@ function calculateAdvancedStats() {
     }
 
     // 3. Para a Meta da Semana
-    if (currentGoal && !isNaN(currentWeight)) {
-        const goalDiff = (currentWeight - parseFloat(currentGoal)).toFixed(1);
+    // Pega o último peso registrado (hoje ou no passado)
+    const sortedAllWeights = Object.keys(habitsData)
+        .filter(d => d.includes('-') && !d.includes('W') && habitsData[d].weight)
+        .sort().reverse();
+
+    const lastKnownWeight = sortedAllWeights.length > 0 ? parseFloat(habitsData[sortedAllWeights[0]].weight) : NaN;
+
+    if (currentGoal && !isNaN(lastKnownWeight)) {
+        const goalDiff = (lastKnownWeight - parseFloat(currentGoal)).toFixed(1);
         toGoalEl.textContent = `${goalDiff > 0 ? goalDiff : '0'} kg`;
         document.querySelector('.highlight-goal .stat-label').textContent = "Meta Semanal";
     } else {
@@ -339,15 +346,33 @@ function updateCardVisuals(type, isActive) {
 function saveDataLocally() { localStorage.setItem('habitsData', JSON.stringify(habitsData)); }
 
 function calculateStreak() {
-    let streak = 0, checkDate = new Date();
-    while (true) {
-        const dateStr = checkDate.toISOString().split('T')[0];
-        const dayData = habitsData[dateStr];
-        if (dayData && dayData.cardio && dayData.diet) {
-            streak++;
-            checkDate.setDate(checkDate.getDate() - 1);
-        } else break;
+    let streak = 0;
+    let checkDate = new Date();
+
+    // Converte para string YYYY-MM-DD local
+    const getLocalISO = (d) => {
+        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+    };
+
+    let dateStr = getLocalISO(checkDate);
+    let dayData = habitsData[dateStr];
+
+    // Se hoje não está completo, começamos a checar a partir de ontem
+    // para não zerar o streak enquanto o dia ainda está rolando
+    if (!(dayData && dayData.cardio && dayData.diet)) {
+        checkDate.setDate(checkDate.getDate() - 1);
+        dateStr = getLocalISO(checkDate);
+        dayData = habitsData[dateStr];
     }
+
+    // Agora contamos para trás enquanto os dias forem perfeitos
+    while (dayData && dayData.cardio && dayData.diet) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+        dateStr = getLocalISO(checkDate);
+        dayData = habitsData[dateStr];
+    }
+
     animateValue(streakCountElement, parseInt(streakCountElement.textContent) || 0, streak, 800);
 }
 

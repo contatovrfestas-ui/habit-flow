@@ -258,10 +258,32 @@ body {
     margin: 0 1rem;
 }
 
-.goal-group #targetWeightInput {
+.goal-group {
+    position: relative;
+}
+
+.save-feedback-icon {
+    position: absolute;
+    right: -25px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.save-feedback-icon.show {
+    opacity: 1;
+}
+
+#targetWeightInput {
+    background: none;
+    border: none;
     color: var(--accent-diet);
-    width: 70px;
     font-size: 1.5rem;
+    font-weight: 800;
+    width: 70px;
+    outline: none;
+    font-family: 'Outfit', sans-serif;
 }
 
 #weightInput {
