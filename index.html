@@ -89,7 +89,7 @@
                 </div>
                 <div class="weight-divider"></div>
                 <div class="weight-info">
-                    <span class="label">Sua Meta</span>
+                    <span class="label">Meta da Semana</span>
                     <div class="weight-input-group goal-group">
                         <input type="number" id="targetWeightInput" step="0.1" placeholder="--"
                             onchange="saveTargetWeight()">
@@ -169,6 +169,20 @@
         </header>
 
         <div class="stats-overview">
+            <div class="stats-grid-cards">
+                <div class="stat-mini-card">
+                    <span class="stat-label">Adesão Total</span>
+                    <span class="stat-value" id="adherenceValue">0%</span>
+                </div>
+                <div class="stat-mini-card highlight-weight">
+                    <span class="stat-label">Variação Total</span>
+                    <span class="stat-value" id="weightChangeValue">-- kg</span>
+                </div>
+                <div class="stat-mini-card highlight-goal">
+                    <span class="stat-label">Para a Meta</span>
+                    <span class="stat-value" id="toGoalValue">-- kg</span>
+                </div>
+            </div>
             <div class="chart-container">
                 <canvas id="weightChart"></canvas>
             </div>

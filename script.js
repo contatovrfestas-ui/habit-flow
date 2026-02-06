@@ -67,7 +67,61 @@ const quotes = [
     "Seja mais forte que sua melhor desculpa."
 ];
 
+// Helper para obter o ID da semana (YYYY-WW)
+function getWeekID(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return `${d.getUTCFullYear()}-${String(weekNo).padStart(2, '0')}`;
+}
+
 // Inicialização
+function calculateAdvancedStats() {
+    const adherenceEl = document.getElementById('adherenceValue');
+    const changeEl = document.getElementById('weightChangeValue');
+    const toGoalEl = document.getElementById('toGoalValue');
+
+    const weekId = getWeekID(new Date());
+    const currentGoal = habitsData.weeklyGoals?.[weekId];
+
+    // 1. Adesão Semanal (Últimos 7 dias)
+    const last7Days = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        last7Days.push(d.toISOString().split('T')[0]);
+    }
+    const perfectDays = last7Days.filter(d => habitsData[d] && habitsData[d].cardio && habitsData[d].diet).length;
+    adherenceEl.textContent = `${Math.round((perfectDays / 7) * 100)}%`;
+
+    // 2. Variação na Semana (Desde segunda-feira)
+    const todayObj = new Date();
+    const dayOfWeek = todayObj.getDay() || 7; // 1 (Seg) a 7 (Dom)
+    const mondayObj = new Date(todayObj);
+    mondayObj.setDate(todayObj.getDate() - (dayOfWeek - 1));
+    const mondayStr = mondayObj.toISOString().split('T')[0];
+
+    const currentWeight = parseFloat(habitsData[today]?.weight);
+    const mondayWeight = parseFloat(habitsData[mondayStr]?.weight);
+
+    if (!isNaN(currentWeight) && !isNaN(mondayWeight)) {
+        const diff = (currentWeight - mondayWeight).toFixed(1);
+        changeEl.textContent = `${diff > 0 ? '+' : ''}${diff} kg`;
+    } else {
+        changeEl.textContent = "-- kg";
+    }
+
+    // 3. Para a Meta da Semana
+    if (currentGoal && !isNaN(currentWeight)) {
+        const goalDiff = (currentWeight - parseFloat(currentGoal)).toFixed(1);
+        toGoalEl.textContent = `${goalDiff > 0 ? goalDiff : '0'} kg`;
+        document.querySelector('.highlight-goal .stat-label').textContent = "Meta Semanal";
+    } else {
+        toGoalEl.textContent = "-- kg";
+    }
+}
+
 async function init() {
     console.log("🚀 Iniciando App (Modo Fetch Nativo)...");
     updateDateDisplay();
@@ -76,6 +130,7 @@ async function init() {
     calculateStreak();
     updateProgressRing();
     renderFullHistory();
+    calculateAdvancedStats();
     checkNotificationState();
 
     // Inicia ciclo de lembretes (checa a cada hora)
@@ -139,7 +194,7 @@ async function syncWithSanity() {
     const statusDiv = document.getElementById('cloudStatus');
     try {
         console.log("🔄 Buscando dados da nuvem...");
-        const entries = await fetchSanity('*[_type in ["habitEntry", "appSettings"]] | order(date desc)');
+        const entries = await fetchSanity('*[_type in ["habitEntry", "appSettings", "weeklyGoal"]] | order(date desc)');
         console.log(`📥 Recebido: ${entries.length} objetos.`);
 
         if (statusText) statusText.textContent = "Nuvem: Sincronizada";
@@ -155,6 +210,9 @@ async function syncWithSanity() {
                     };
                 } else if (entry._type === 'appSettings' && entry._id === 'settings-goal') {
                     habitsData.targetWeight = entry.targetWeight;
+                } else if (entry._type === 'weeklyGoal') {
+                    if (!habitsData.weeklyGoals) habitsData.weeklyGoals = {};
+                    habitsData.weeklyGoals[entry.weekId] = entry.targetWeight;
                 }
             });
             saveDataLocally();
@@ -311,17 +369,21 @@ function updateChart() {
     const ctx = document.getElementById('weightChart');
     if (!ctx) return;
 
-    // Prepara dados: ordena por data, filtra apenas quem tem peso
-    const sortedDates = Object.keys(habitsData).sort();
+    const sortedDates = Object.keys(habitsData).filter(d => d.includes('-') && !d.includes('W')).sort();
     const chartData = sortedDates
         .filter(d => habitsData[d].weight)
         .map(d => ({ x: d, y: parseFloat(habitsData[d].weight) }));
 
     if (chartData.length === 0) return;
 
-    if (weightChart) {
-        weightChart.destroy();
-    }
+    if (weightChart) weightChart.destroy();
+
+    // Gera a linha de meta baseada na semana de cada ponto
+    const targetData = sortedDates.map(dateStr => {
+        const weekId = getWeekID(new Date(dateStr + 'T00:00:00'));
+        const weeklyGoal = habitsData.weeklyGoals?.[weekId];
+        return weeklyGoal ? parseFloat(weeklyGoal) : null;
+    });
 
     weightChart = new Chart(ctx, {
         type: 'line',
@@ -332,7 +394,7 @@ function updateChart() {
             }),
             datasets: [
                 {
-                    label: 'Evolução do Peso (kg)',
+                    label: 'Peso (kg)',
                     data: chartData.map(d => d.y),
                     borderColor: '#00f2fe',
                     backgroundColor: 'rgba(0, 242, 254, 0.1)',
@@ -342,32 +404,25 @@ function updateChart() {
                     pointBackgroundColor: '#00f2fe',
                     pointRadius: 4
                 },
-                habitsData.targetWeight ? {
-                    label: 'Meta',
-                    data: new Array(chartData.length).fill(parseFloat(habitsData.targetWeight)),
-                    borderColor: 'rgba(74, 222, 128, 0.5)',
+                {
+                    label: 'Meta da Semana',
+                    data: targetData,
+                    borderColor: 'rgba(74, 222, 128, 0.6)',
                     borderWidth: 2,
                     borderDash: [5, 5],
+                    stepped: 'before', // Faz a linha em degraus
                     pointRadius: 0,
                     fill: false
-                } : null
-            ].filter(d => d !== null)
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                    ticks: { color: '#94a3b8' }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#94a3b8' }
-                }
+                y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
             }
         }
     });
@@ -375,23 +430,28 @@ function updateChart() {
 
 function saveTargetWeight() {
     const input = document.getElementById('targetWeightInput');
-    habitsData.targetWeight = input.value;
+    const weekId = getWeekID(new Date());
+
+    if (!habitsData.weeklyGoals) habitsData.weeklyGoals = {};
+    habitsData.weeklyGoals[weekId] = input.value;
+
     saveDataLocally();
-    // Salva a meta como um documento especial no Sanity
-    pushTargetWeightToSanity(input.value);
+    pushTargetWeightToSanity(weekId, input.value);
     updateChart();
+    calculateAdvancedStats();
 }
 
-async function pushTargetWeightToSanity(weight) {
+async function pushTargetWeightToSanity(weekId, weight) {
     try {
         await mutateSanity([{
             createOrReplace: {
-                _id: 'settings-goal',
-                _type: 'appSettings',
+                _id: `goal-${weekId}`,
+                _type: 'weeklyGoal',
+                weekId: weekId,
                 targetWeight: weight
             }
         }]);
-    } catch (err) { console.error("Erro ao salvar meta na nuvem:", err); }
+    } catch (err) { console.error("Erro ao salvar meta semanal:", err); }
 }
 
 function editPastWeight(dateStr) {
@@ -429,6 +489,7 @@ function switchTab(tab) {
     navToday.classList.toggle('active', tab === 'today');
     navHistory.classList.toggle('active', tab === 'history');
     if (tab === 'history') {
+        calculateAdvancedStats();
         setTimeout(updateChart, 100);
     }
 }

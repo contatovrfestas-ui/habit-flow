@@ -519,6 +519,45 @@ body {
     margin-bottom: 2rem;
 }
 
+.stats-grid-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-mini-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-mini-card .stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-mini-card .stat-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.highlight-weight .stat-value {
+    color: var(--accent-cardio);
+}
+
+.highlight-goal .stat-value {
+    color: var(--accent-diet);
+}
+
 .chart-container {
     height: 200px;
     width: 100%;
