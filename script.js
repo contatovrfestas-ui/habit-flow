@@ -138,6 +138,7 @@ async function init() {
     updateProgressRing();
     renderFullHistory();
     calculateAdvancedStats();
+    updateTotalCounters();
     checkNotificationState();
 
     // Inicia ciclo de lembretes (checa a cada hora)
@@ -280,6 +281,14 @@ function loadTodayData() {
     updateCardVisuals('cardio', habitsData[today].cardio);
     updateCardVisuals('diet', habitsData[today].diet);
     weightInput.value = habitsData[today].weight || "";
+
+    // Atualiza o ID da semana no label da meta
+    const weekId = getWeekID(new Date());
+    const weekDisplay = document.getElementById('weekIdDisplay');
+    if (weekDisplay) weekDisplay.textContent = `(S${weekId.split('-W')[1]})`;
+
+    const targetInput = document.getElementById('targetWeightInput');
+    if (targetInput) targetInput.value = habitsData.weeklyGoals?.[weekId] || "";
 }
 
 function saveWeight() {
@@ -374,6 +383,25 @@ function calculateStreak() {
     }
 
     animateValue(streakCountElement, parseInt(streakCountElement.textContent) || 0, streak, 800);
+    updateTotalCounters();
+}
+
+function updateTotalCounters() {
+    let cardios = 0;
+    let dietas = 0;
+
+    Object.keys(habitsData).forEach(date => {
+        if (date.includes('-') && !date.includes('W')) {
+            if (habitsData[date].cardio) cardios++;
+            if (habitsData[date].diet) dietas++;
+        }
+    });
+
+    const cardioEl = document.getElementById('totalCardioDays');
+    const dietEl = document.getElementById('totalDietDays');
+
+    if (cardioEl) animateValue(cardioEl, parseInt(cardioEl.textContent) || 0, cardios, 800);
+    if (dietEl) animateValue(dietEl, parseInt(dietEl.textContent) || 0, dietas, 800);
 }
 
 function animateValue(obj, start, end, duration) {
@@ -456,12 +484,20 @@ function updateChart() {
 function saveTargetWeight() {
     const input = document.getElementById('targetWeightInput');
     const weekId = getWeekID(new Date());
+    const feedback = document.getElementById('goalSaveFeedback');
 
     if (!habitsData.weeklyGoals) habitsData.weeklyGoals = {};
     habitsData.weeklyGoals[weekId] = input.value;
 
     saveDataLocally();
     pushTargetWeightToSanity(weekId, input.value);
+
+    // Feedback visual
+    if (feedback) {
+        feedback.classList.add('show');
+        setTimeout(() => feedback.classList.remove('show'), 2000);
+    }
+
     updateChart();
     calculateAdvancedStats();
 }

@@ -467,6 +467,51 @@ body {
     margin-top: -0.5rem;
 }
 
+.totals-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+}
+
+.total-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.total-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
+}
+
+.total-count {
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+#totalCardioDays {
+    color: var(--accent-cardio);
+}
+
+#totalDietDays {
+    color: var(--accent-diet);
+}
+
+.total-divider {
+    width: 1px;
+    height: 30px;
+    background: var(--card-border);
+}
+
 /* Navigation */
 .bottom-nav {
     position: fixed;
