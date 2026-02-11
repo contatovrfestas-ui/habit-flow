@@ -576,7 +576,7 @@ const navHistory = document.getElementById('navHistory');
 function renderFullHistory() {
     if (!fullHistoryList) return;
     fullHistoryList.innerHTML = '';
-    Object.keys(habitsData).sort().reverse().forEach(dateStr => {
+    Object.keys(habitsData).filter(d => d.includes('-') && !d.includes('W')).sort().reverse().forEach(dateStr => {
         const entry = habitsData[dateStr];
         const dateObj = new Date(dateStr + 'T00:00:00');
         const dayLabel = dateObj.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
@@ -590,12 +590,43 @@ function renderFullHistory() {
                     ${entry.weight ? entry.weight + ' kg' : 'Add peso'}
                 </span>
             </div>
-            <div class="history-status">
-                <div class="status-dot ${entry.cardio ? 'completed-cardio' : ''}" onclick="togglePastHabit('${dateStr}', 'cardio')"></div>
-                <div class="status-dot ${entry.diet ? 'completed-diet' : ''}" onclick="togglePastHabit('${dateStr}', 'diet')"></div>
+            <div class="history-actions">
+                <div class="history-status">
+                    <div class="status-dot ${entry.cardio ? 'completed-cardio' : ''}" onclick="togglePastHabit('${dateStr}', 'cardio')"></div>
+                    <div class="status-dot ${entry.diet ? 'completed-diet' : ''}" onclick="togglePastHabit('${dateStr}', 'diet')"></div>
+                </div>
+                <button class="delete-record-btn" onclick="deleteRecord('${dateStr}')" title="Apagar Registro">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
             </div>`;
         fullHistoryList.appendChild(item);
     });
+}
+
+async function deleteRecord(dateStr) {
+    if (!confirm(`Tem certeza que deseja apagar o registro do dia ${dateStr}?`)) return;
+
+    // Remove localmente
+    delete habitsData[dateStr];
+    saveDataLocally();
+
+    // Sincroniza (remove do Sanity)
+    try {
+        await mutateSanity([{
+            delete: { id: `habit-${dateStr}` }
+        }]);
+        console.log(`🗑️ Registro ${dateStr} removido da nuvem.`);
+    } catch (err) {
+        console.error("Erro ao apagar registro na nuvem:", err);
+    }
+
+    // Atualiza UI
+    renderFullHistory();
+    calculateStreak();
+    calculateAdvancedStats();
+    updateTotalCounters();
+    updateChart();
+    if (dateStr === today) loadTodayData();
 }
 
 // Atribuindo funções globais
@@ -607,5 +638,6 @@ window.editPastWeight = editPastWeight;
 window.addPastDate = addPastDate;
 window.saveTargetWeight = saveTargetWeight;
 window.toggleNotifications = toggleNotifications;
+window.deleteRecord = deleteRecord;
 
 document.addEventListener('DOMContentLoaded', init);

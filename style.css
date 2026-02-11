@@ -579,7 +579,35 @@ body {
     border-radius: 20px;
     padding: 1.25rem;
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.history-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.delete-record-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 10px;
+    opacity: 0.3;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-record-btn:hover {
+    color: var(--accent-cardio);
+    background: rgba(255, 77, 77, 0.1);
+    opacity: 1;
 }
 
 /* History Enhancements */
