@@ -119,45 +119,70 @@
             </div>
         </section>
 
-        <section class="habits-grid">
-            <div class="habit-card" id="cardioCard" onclick="toggleHabit('cardio')">
-                <div class="habit-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.78 7.65 7.65 7.65-7.65.78-.78a5.4 5.4 0 0 0 0-7.65z">
-                        </path>
+        <section class="routine-card-container">
+            <div class="routine-card">
+                <div class="routine-item">
+                    <span class="label">Acordei</span>
+                    <input type="time" id="wakeTime" onchange="saveRoutine()">
+                </div>
+                <div class="routine-divider"></div>
+                <div class="routine-item">
+                    <span class="label">Dormi</span>
+                    <input type="time" id="sleepTime" onchange="saveRoutine()">
+                </div>
+                <div class="routine-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path>
+                        <path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path>
+                        <path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path>
+                        <path d="m19.07 4.93-1.41 1.41"></path>
+                        <circle cx="12" cy="12" r="4"></circle>
                     </svg>
                 </div>
-                <div class="habit-info">
-                    <h2>Cardio</h2>
-                    <p>Fez seu cardio hoje?</p>
-                </div>
-                <div class="check-indicator">
-                    <div class="inner-check"></div>
-                </div>
             </div>
+        </section>
+        <div class="habit-card" id="cardioCard" onclick="toggleHabit('cardio')">
+            <div class="habit-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l.77.78 7.65 7.65 7.65-7.65.78-.78a5.4 5.4 0 0 0 0-7.65z">
+                    </path>
+                </svg>
+            </div>
+            <div class="habit-info">
+                <h2>Cardio</h2>
+                <p>Fez seu cardio hoje?</p>
+            </div>
+            <div class="check-indicator">
+                <div class="inner-check"></div>
+            </div>
+        </div>
 
-            <div class="habit-card" id="dietCard" onclick="toggleHabit('diet')">
-                <div class="habit-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path
-                            d="M12 20.94c1.5 2.3 6 1.76 6-2 0-2.3-3.6-4.9-6-5.4-2.4 0.5-6 3.1-6 5.4 0 3.76 4.5 4.3 6 2Z"
-                            fill="currentColor" fill-opacity="0.2"></path>
-                        <path
-                            d="M12 20.94a6.5 6.5 0 0 1-6-5.4c0-4.3 6-7.7 6-12.54 0 4.84 6 8.24 6 12.54a6.5 6.5 0 0 1-6 5.4Z">
-                        </path>
-                    </svg>
-                </div>
-                <div class="habit-info">
-                    <h2>Dieta</h2>
-                    <p>Manteve a dieta?</p>
-                </div>
-                <div class="check-indicator">
-                    <div class="inner-check"></div>
-                </div>
+        <div class="habit-card" id="dietCard" onclick="toggleHabit('diet')">
+            <div class="habit-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20.94c1.5 2.3 6 1.76 6-2 0-2.3-3.6-4.9-6-5.4-2.4 0.5-6 3.1-6 5.4 0 3.76 4.5 4.3 6 2Z"
+                        fill="currentColor" fill-opacity="0.2"></path>
+                    <path
+                        d="M12 20.94a6.5 6.5 0 0 1-6-5.4c0-4.3 6-7.7 6-12.54 0 4.84 6 8.24 6 12.54a6.5 6.5 0 0 1-6 5.4Z">
+                    </path>
+                </svg>
             </div>
+            <div class="habit-info">
+                <h2>Dieta</h2>
+                <p>Manteve a dieta?</p>
+            </div>
+            <div class="check-indicator">
+                <div class="inner-check"></div>
+            </div>
+        </div>
         </section>
 
         <footer class="streak-container">

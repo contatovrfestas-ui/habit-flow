@@ -214,7 +214,9 @@ async function syncWithSanity() {
                     habitsData[entry.date] = {
                         cardio: entry.cardio || false,
                         diet: entry.diet || false,
-                        weight: entry.weight || ""
+                        weight: entry.weight || "",
+                        wakeTime: entry.wakeTime || "",
+                        sleepTime: entry.sleepTime || ""
                     };
                 } else if (entry._type === 'appSettings' && entry._id === 'settings-goal') {
                     habitsData.targetWeight = entry.targetWeight;
@@ -248,7 +250,9 @@ async function pushToSanity(dateStr) {
         date: dateStr,
         cardio: !!data.cardio,
         diet: !!data.diet,
-        weight: data.weight || ""
+        weight: data.weight || "",
+        wakeTime: data.wakeTime || "",
+        sleepTime: data.sleepTime || ""
     };
 
     try {
@@ -277,10 +281,12 @@ function updateDateDisplay() {
 }
 
 function loadTodayData() {
-    if (!habitsData[today]) habitsData[today] = { cardio: false, diet: false, weight: "" };
+    if (!habitsData[today]) habitsData[today] = { cardio: false, diet: false, weight: "", wakeTime: "", sleepTime: "" };
     updateCardVisuals('cardio', habitsData[today].cardio);
     updateCardVisuals('diet', habitsData[today].diet);
     weightInput.value = habitsData[today].weight || "";
+    document.getElementById('wakeTime').value = habitsData[today].wakeTime || "";
+    document.getElementById('sleepTime').value = habitsData[today].sleepTime || "";
 
     // Atualiza o ID da semana no label da meta
     const weekId = getWeekID(new Date());
@@ -293,6 +299,16 @@ function loadTodayData() {
 
 function saveWeight() {
     habitsData[today].weight = weightInput.value;
+    saveDataLocally();
+    pushToSanity(today);
+    renderFullHistory();
+}
+
+function saveRoutine() {
+    const wake = document.getElementById('wakeTime').value;
+    const sleep = document.getElementById('sleepTime').value;
+    habitsData[today].wakeTime = wake;
+    habitsData[today].sleepTime = sleep;
     saveDataLocally();
     pushToSanity(today);
     renderFullHistory();
@@ -589,6 +605,9 @@ function renderFullHistory() {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                     ${entry.weight ? entry.weight + ' kg' : 'Add peso'}
                 </span>
+                <span class="routine-history-text" style="font-size: 0.75rem; color: var(--text-secondary); opacity: 0.7;">
+                    ${entry.wakeTime ? '🌅 ' + entry.wakeTime : ''} ${entry.sleepTime ? ' 🌙 ' + entry.sleepTime : ''}
+                </span>
             </div>
             <div class="history-actions">
                 <div class="history-status">
@@ -639,5 +658,6 @@ window.addPastDate = addPastDate;
 window.saveTargetWeight = saveTargetWeight;
 window.toggleNotifications = toggleNotifications;
 window.deleteRecord = deleteRecord;
+window.saveRoutine = saveRoutine;
 
 document.addEventListener('DOMContentLoaded', init);
