@@ -605,8 +605,10 @@ function renderFullHistory() {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                     ${entry.weight ? entry.weight + ' kg' : 'Add peso'}
                 </span>
-                <span class="routine-history-text" style="font-size: 0.75rem; color: var(--text-secondary); opacity: 0.7;">
-                    ${entry.wakeTime ? '🌅 ' + entry.wakeTime : ''} ${entry.sleepTime ? ' 🌙 ' + entry.sleepTime : ''}
+                <span class="routine-history-text" onclick="editPastRoutine('${dateStr}')" title="Editar horários">
+                    ${entry.wakeTime || entry.sleepTime ?
+                (entry.wakeTime ? '🌅 ' + entry.wakeTime : '') + (entry.sleepTime ? ' 🌙 ' + entry.sleepTime : '')
+                : '🌅/🌙 --:--'}
                 </span>
             </div>
             <div class="history-actions">
@@ -648,6 +650,24 @@ async function deleteRecord(dateStr) {
     if (dateStr === today) loadTodayData();
 }
 
+function editPastRoutine(dateStr) {
+    const entry = habitsData[dateStr] || { wakeTime: "", sleepTime: "" };
+    const newWake = prompt(`Horário que acordou no dia ${dateStr} (ex: 07:00):`, entry.wakeTime || "");
+    if (newWake === null) return;
+
+    const newSleep = prompt(`Horário que foi dormir no dia ${dateStr} (ex: 22:30):`, entry.sleepTime || "");
+    if (newSleep === null) return;
+
+    if (!habitsData[dateStr]) habitsData[dateStr] = { cardio: false, diet: false, weight: "" };
+    habitsData[dateStr].wakeTime = newWake;
+    habitsData[dateStr].sleepTime = newSleep;
+
+    saveDataLocally();
+    pushToSanity(dateStr);
+    renderFullHistory();
+    if (dateStr === today) loadTodayData();
+}
+
 // Atribuindo funções globais
 window.toggleHabit = toggleHabit;
 window.togglePastHabit = togglePastHabit;
@@ -659,5 +679,6 @@ window.saveTargetWeight = saveTargetWeight;
 window.toggleNotifications = toggleNotifications;
 window.deleteRecord = deleteRecord;
 window.saveRoutine = saveRoutine;
+window.editPastRoutine = editPastRoutine;
 
 document.addEventListener('DOMContentLoaded', init);

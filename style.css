@@ -667,6 +667,19 @@ body {
     opacity: 1;
 }
 
+.routine-history-text {
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.routine-history-text:hover {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7 !important;
+    opacity: 1 !important;
+}
+
 /* History Enhancements */
 .stats-overview {
     background: var(--card-bg);
