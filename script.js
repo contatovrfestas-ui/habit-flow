@@ -389,17 +389,28 @@ function calculateStreak() {
 function updateTotalCounters() {
     let cardios = 0;
     let dietas = 0;
+    let dates = Object.keys(habitsData).filter(d => d.includes('-') && !d.includes('W'));
 
-    Object.keys(habitsData).forEach(date => {
-        if (date.includes('-') && !date.includes('W')) {
-            if (habitsData[date].cardio) cardios++;
-            if (habitsData[date].diet) dietas++;
-        }
+    dates.forEach(date => {
+        if (habitsData[date].cardio) cardios++;
+        if (habitsData[date].diet) dietas++;
     });
 
+    // Cálculo da Jornada (Dias desde o primeiro registro)
+    let journeyDays = 0;
+    if (dates.length > 0) {
+        const sortedDates = dates.sort();
+        const firstDate = new Date(sortedDates[0] + 'T00:00:00');
+        const todayObj = new Date(today + 'T00:00:00');
+        const diffTime = Math.abs(todayObj - firstDate);
+        journeyDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 para incluir o próprio dia inicial
+    }
+
+    const journeyEl = document.getElementById('totalJourneyDays');
     const cardioEl = document.getElementById('totalCardioDays');
     const dietEl = document.getElementById('totalDietDays');
 
+    if (journeyEl) animateValue(journeyEl, parseInt(journeyEl.textContent) || 0, journeyDays, 800);
     if (cardioEl) animateValue(cardioEl, parseInt(cardioEl.textContent) || 0, cardios, 800);
     if (dietEl) animateValue(dietEl, parseInt(dietEl.textContent) || 0, dietas, 800);
 }

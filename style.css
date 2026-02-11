@@ -498,6 +498,11 @@ body {
     font-weight: 800;
 }
 
+#totalJourneyDays {
+    color: #a855f7;
+}
+
+/* Roxo para a jornada */
 #totalCardioDays {
     color: var(--accent-cardio);
 }
